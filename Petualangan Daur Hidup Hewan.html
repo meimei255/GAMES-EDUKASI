@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Petualangan Daur Hidup Hewan</title>
+<style>
+:root{--bg1:#d9f2e3;--bg2:#fdf3d9;--card:#ffffffd9;--ink:#3b3a4a;--pink:#ffc9dc;--blue:#c6e3ff;--yellow:#fff1a8;--green:#bfe8c9;--ok:#7ccf9b;--no:#f6a6a6;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg1:#27403a;--bg2:#3b3a2c;--card:#2d3a38e6;--ink:#f3f1ea;--pink:#8a5b6d;--blue:#4c6a88;--yellow:#8b7f3c;--green:#48775a;--ok:#3f8f62;--no:#9b4f4f}}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Comic Sans MS","Baloo 2",system-ui,sans-serif;color:var(--ink);background:linear-gradient(180deg,var(--bg1),var(--bg2));min-height:100vh;font-size:18px}
+.deco{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+.deco span{position:absolute;font-size:34px;opacity:.55;animation:sway 5s ease-in-out infinite}
+@keyframes sway{50%{transform:translateY(-10px) rotate(6deg)}}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+@keyframes pop{0%{transform:scale(.6);opacity:0}100%{transform:scale(1);opacity:1}}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+main{position:relative;z-index:1;max-width:760px;margin:0 auto;padding:16px}
+.card{background:var(--card);border-radius:28px;padding:22px;box-shadow:0 6px 0 #0001;animation:pop .4s}
+h1,h2{margin:.2em 0}
+h1{font-size:30px}
+.big{font-size:80px;animation:bounce 1.6s infinite;text-align:center}
+.center{text-align:center}
+button{font:inherit;color:var(--ink);border:0;border-radius:20px;padding:12px 20px;background:var(--yellow);cursor:pointer;box-shadow:0 4px 0 #0002;margin:4px}
+button:active{transform:translateY(3px);box-shadow:none}
+.pink{background:var(--pink)}.blue{background:var(--blue)}.green{background:var(--green)}
+.row{display:flex;flex-wrap:wrap;justify-content:center;gap:6px}
+.stage{display:inline-block;text-align:center;background:var(--blue);border-radius:20px;padding:10px 14px;margin:4px;min-width:92px}
+.stage b{display:block;font-size:42px}
+.bar{height:14px;background:#0001;border-radius:9px;margin:10px 0}
+.bar i{display:block;height:100%;background:var(--ok);border-radius:9px;transition:width .4s}
+.slot{min-height:56px;border:3px dashed #8886;border-radius:18px;display:inline-block;min-width:140px;padding:8px 14px;margin:6px;vertical-align:middle;background:#fff3;text-align:center}
+.slot.over{background:var(--yellow)}
+.chip{cursor:grab;user-select:none;touch-action:none}
+.chip.sel{outline:4px solid var(--ok)}
+.fb{min-height:48px;font-weight:bold;margin:8px 0}
+.fb.ok{color:#2e8b57}.fb.no{color:#c0504d;animation:shake .4s}
+.scene{font-size:64px;min-height:110px}
+@media (prefers-color-scheme:dark){.fb.ok{color:#9be3b6}.fb.no{color:#ffb4b4}}
+</style>
+</head>
+<body>
+<div class="deco" aria-hidden="true">
+<span style="left:3%;top:8%">🌳</span><span style="right:4%;top:14%;animation-delay:1s">🌴</span><span style="left:8%;bottom:10%;animation-delay:2s">🌿</span><span style="right:7%;bottom:8%;animation-delay:.5s">🌺</span><span style="left:45%;top:3%;animation-delay:1.5s">☁️</span>
+</div>
+<main id="app"></main>
+<script>
+const $=document.getElementById('app');
+const ANIM={
+ kupu:{n:'Kupu-kupu',e:'🦋',s:[['🥚','Telur','Kupu-kupu bertelur di atas daun.'],['🐛','Ulat','Telur menetas jadi ulat. Ulat makan daun banyak sekali!'],['🌰','Kepompong','Ulat berhenti makan dan berubah jadi kepompong.'],['🦋','Kupu-kupu','Kepompong terbuka. Kupu-kupu cantik terbang!']]},
+ katak:{n:'Katak',e:'🐸',s:[['🥚','Telur','Katak bertelur di dalam air.'],['🐟','Berudu','Telur menetas jadi berudu. Berudu berenang pakai ekor.'],['🐸','Katak muda','Berudu tumbuh kaki, ekornya memendek.'],['🐸','Katak dewasa','Katak dewasa bisa melompat di darat!']]},
+ ayam:{n:'Ayam',e:'🐔',s:[['🥚','Telur','Induk ayam mengerami telurnya.'],['🐣','Anak ayam','Telur menetas jadi anak ayam berbulu halus.'],['🐔','Ayam dewasa','Anak ayam tumbuh besar jadi ayam dewasa.']]}
+};
+const Q=[
+['Telur kupu-kupu menetas menjadi ...','Ulat',['Ulat','Kepompong','Kupu-kupu']],
+['Ulat berubah menjadi ...','Kepompong',['Kepompong','Telur','Kupu-kupu']],
+['Dari kepompong keluar ...','Kupu-kupu',['Berudu','Kupu-kupu','Ulat']],
+['Telur katak menetas menjadi ...','Berudu',['Berudu','Ulat','Anak ayam']],
+['Berudu tumbuh kaki lalu menjadi ...','Katak',['Katak','Kepompong','Telur']],
+['Anak ayam keluar dari ...','Telur',['Telur','Kepompong','Air']],
+['Tahap pertama daur hidup hewan di atas adalah ...','Telur',['Ulat','Telur','Ayam dewasa']],
+['Hewan yang punya tahap kepompong adalah ...','Kupu-kupu',['Katak','Ayam','Kupu-kupu']],
+['Berudu hidup di ...','Air',['Air','Pohon','Pasir']],
+['Ulat sangat suka makan ...','Daun',['Daun','Batu','Pasir']]
+];
+let S={i:0,score:0,sel:null,done:false};
+const shuf=a=>[...a].sort(()=>Math.random()-.5);
+function show(h){$.innerHTML='<div class="card">'+h+'</div>';window.scrollTo(0,0)}
+function home(){show(`<div class="big">🦋🐸🐣</div><h1 class="center">Petualangan Daur Hidup Hewan</h1><p class="center">Media Belajar IPAS · Kelas 3 SD<br>Ayo kenalan dengan teman-teman hewan di hutan tropis!</p><p class="center"><label>Namamu: <input id="nm" placeholder="Tulis namamu" style="font:inherit;padding:8px;border-radius:14px;border:2px solid #8886"></label></p><div class="center"><button class="pink" onclick="S.name=document.getElementById('nm').value.trim();goal()">Mulai Petualangan ▶</button></div>`)}
+function goal(){show(`<h2>🎯 Tujuan Belajar${S.name?', '+S.name:''}</h2><p>Setelah belajar, aku bisa:</p><p>⭐ Menyebutkan tahap daur hidup hewan.<br>⭐ Mengurutkan perubahan hewan dari kecil sampai dewasa.<br>⭐ Menjelaskan bahwa hewan berubah seiring tumbuh.</p><div class="center"><button onclick="home()">◀ Kembali</button><button class="pink" onclick="materi()">Lanjut ▶</button></div>`)}
+function materi(){show(`<h2>📖 Materi: Daur Hidup</h2><p><b>Daur hidup</b> adalah urutan perubahan hewan dari lahir, tumbuh, sampai dewasa. Lalu hewan dewasa bertelur lagi, jadi berputar seperti lingkaran! 🔄</p><div class="center">`+Object.values(ANIM).map(a=>`<h3>${a.e} ${a.n}</h3>`+a.s.map(x=>`<span class="stage"><b>${x[0]}</b>${x[1]}</span>`).join('→')).join('')+`</div><p>💡 Kupu-kupu dan katak <b>berubah bentuk</b> sangat jauh. Ayam hanya tumbuh makin besar.</p><div class="center"><button onclick="goal()">◀ Kembali</button><button class="pink" onclick="adv()">Ke Petualangan ▶</button></div>`)}
+function adv(){show(`<h2>🌴 Aktivitas Petualangan</h2><p>Pilih satu hewan. Lalu bantu dia tumbuh dengan menekan tombol!</p><div class="row">`+Object.keys(ANIM).map(k=>`<button class="${k=='kupu'?'pink':k=='katak'?'green':'blue'}" onclick="play('${k}')">${ANIM[k].e} ${ANIM[k].n}</button>`).join('')+`</div><div class="center"><button onclick="materi()">◀ Kembali</button><button class="pink" onclick="quiz()">Langsung ke Kuis ▶</button></div>`)}
+function play(k,i=0){const a=ANIM[k],s=a.s[i],last=i==a.s.length-1;show(`<h2>${a.e} Petualangan ${a.n}</h2><div class="bar"><i style="width:${(i+1)/a.s.length*100}%"></i></div><div class="scene center" style="animation:bounce 1.4s infinite">${s[0]}</div><h3 class="center">Tahap ${i+1}: ${s[1]}</h3><p class="center">${s[2]}</p><div class="center">`+(last?`<p>🎉 Hore! Kamu berhasil membantu ${a.n} tumbuh!</p><button class="blue" onclick="play('${k}',0)">🔄 Ulangi</button><button class="green" onclick="adv()">Pilih Hewan Lain</button><button class="pink" onclick="quiz()">Mulai Kuis ▶</button>`:`<button class="pink" onclick="play('${k}',${i+1})">Bantu tumbuh ✨</button>`)+`</div>`)}
+function quiz(reset=true){if(reset)S={...S,i:0,score:0};S.sel=null;S.done=false;const q=Q[S.i];
+show(`<h2>📝 Kuis ${S.i+1}/10 <small>· Skor ${S.score}</small></h2><div class="bar"><i style="width:${S.i*10}%"></i></div><p>Seret jawaban ke kotak (atau ketuk jawaban, lalu ketuk kotak).</p><h3>${q[0]} <span class="slot" id="slot">?</span></h3><div class="row" id="chips">`+shuf(q[2]).map(o=>`<button class="chip pink" draggable="true" data-v="${o}">${o}</button>`).join('')+`</div><div class="fb" id="fb"></div><div class="center" id="nx"></div>`);
+const slot=document.getElementById('slot');
+document.querySelectorAll('.chip').forEach(c=>{c.ondragstart=e=>{e.dataTransfer.setData('text/plain',c.dataset.v)};c.onclick=()=>{if(S.done)return;document.querySelectorAll('.chip').forEach(x=>x.classList.remove('sel'));c.classList.add('sel');S.sel=c.dataset.v}});
+slot.ondragover=e=>{e.preventDefault();slot.classList.add('over')};slot.ondragleave=()=>slot.classList.remove('over');
+slot.ondrop=e=>{e.preventDefault();slot.classList.remove('over');ans(e.dataTransfer.getData('text/plain'))};
+slot.onclick=()=>{if(S.sel)ans(S.sel)}}
+function ans(v){if(S.done||!v)return;S.done=true;const q=Q[S.i],ok=v===q[1],fb=document.getElementById('fb');document.getElementById('slot').textContent=v;
+document.querySelectorAll('.chip').forEach(c=>c.draggable=false);
+if(ok){S.score+=10;fb.className='fb ok';fb.textContent='🎉 Benar! Hebat! +10 poin'}else{fb.className='fb no';fb.textContent='😊 Belum tepat. Jawaban yang benar: '+q[1]}
+document.getElementById('nx').innerHTML=`<button class="green" onclick="next()">${S.i==9?'Lihat Nilai 🏆':'Soal Berikutnya ▶'}</button>`}
+function next(){S.i++;S.i>=10?result():quiz(false)}
+function result(){const p=S.score>=70,n=S.name?S.name:'Teman';show(`<div class="big">${p?'🏆':'🌱'}</div><h1 class="center">Nilaimu: ${S.score}</h1><p class="center" style="font-size:22px">`+(p?`Hebat sekali, ${n}! 🌟 Kamu sudah paham daur hidup hewan. Pertahankan ya!`:`Tetap semangat, ${n}! 💪 Kamu pasti bisa lebih baik. Yuk baca materi dan coba lagi!`)+`</p><h2>💭 Refleksi</h2><p>Hewan apa yang paling menarik bagimu? Bagaimana perasaanmu belajar hari ini?</p><div class="row"><button onclick="rf(this)">😄 Senang</button><button onclick="rf(this)">🙂 Lumayan</button><button onclick="rf(this)">🤔 Masih bingung</button></div><div class="fb center" id="rfb"></div><div class="center"><button class="blue" onclick="materi()">📖 Baca Materi</button><button class="pink" onclick="quiz()">🔄 Ulangi Kuis</button></div>`)}
+function rf(b){document.getElementById('rfb').textContent=b.textContent.includes('bingung')?'Tidak apa-apa! Tanyakan ke gurumu ya. 💛':'Terima kasih sudah belajar! Ceritakan hewan favoritmu ke temanmu. 🌈'}
+home();
+</script>
+</body>
+</html>
